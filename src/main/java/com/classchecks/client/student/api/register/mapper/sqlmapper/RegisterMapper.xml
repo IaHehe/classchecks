@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.classchecks.client.student.api.register.mapper.RegisterMapper">
+	
+	<!--  -->
+	<insert id="saveRegisterInfo" parameterType="com.classchecks.client.student.api.register.vo.SecurityAccountVo"
+		keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO `security_account` (
+		  securityAccount,
+		  securitSmscode,
+		  regID,
+		  securitType
+		) 
+		VALUES
+		  (#{securityAccount}, #{securitSmsCode}, #{regID}, #{securitType})
+	</insert>
+	
+    <select id="findAccountByPhone" parameterType="java.lang.String" 
+    	resultType="com.classchecks.client.student.api.register.vo.SecurityAccountVo">
+        SELECT 
+		  securityAccount AS securityAccount,
+		  securitSmscode AS securitSmsCode,
+		  faceLabel AS faceLabel,
+		  jwAccount AS jwAccount,
+		  securitType AS securitType 
+		FROM
+		  `security_account` 
+		WHERE securityAccount = #{phone}
+        	
+    </select>
+	
+</mapper>

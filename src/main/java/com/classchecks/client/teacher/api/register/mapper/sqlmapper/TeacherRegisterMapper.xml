@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.classchecks.client.teacher.api.register.mapper.TeacherRegisterMapper">
+	
+	<!-- 教师注册 -->
+	<insert id="saveRegisterInfo" parameterType="com.classchecks.client.teacher.api.register.vo.SecurityAccountVo"
+		keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO `security_account` (
+		  securityAccount,
+		  securitSmscode,
+		  regID,
+		  securitType
+		) 
+		VALUES
+		  (#{securityAccount}, #{securitSmsCode}, #{regID}, #{securitType})
+	</insert>
+	
+</mapper>

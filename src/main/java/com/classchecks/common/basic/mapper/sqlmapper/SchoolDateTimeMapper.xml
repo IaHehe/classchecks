@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.classchecks.common.basic.mapper.SchoolDateTimeMapper">
+
+
+	<select id="getFirstDate" resultType="java.util.Date">
+		select firstweekDay 
+		from schooldatetime
+		where cyear = #{cyear} and csemester=#{csemester}
+	</select>
+	
+	
+	
+	<select id="getAllSchoolCourseTime" resultType="com.classchecks.common.basic.vo.SchoolCourseTimeVo">
+		select section,hour,miniute ,endHour,endMiniute
+		from SchoolCourseTime
+	</select>
+	
+	
+</mapper>

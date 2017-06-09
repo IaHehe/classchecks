@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.classchecks.client.teacher.api.clockin.mapper.ClockinAsTeacherMapper">
+	
+	<select id="findAllAsRoster" resultType="com.classchecks.client.teacher.api.clockin.vo.TeachingRosterVo">
+		SELECT
+			uid as id,
+			username as studentName,
+			facelabel as stuFaceLabel,
+			securityAccount as loginAccount,
+			jwAccount as stuJWAccount,
+			regID as regID,
+			administrationClass as stuClass
+		FROM(
+			SELECT
+			uid,
+			username,
+			facelabel,
+			securityAccount,
+			jwAccount,
+			regID
+			FROM security_account _sa,
+			(
+			SELECT jwnewaccount  ,  username,uid
+			FROM `user`
+			WHERE uid IN(
+			
+				SELECT IDuser
+				FROM elective
+				WHERE IDcourse IN(
+					SELECT 
+					_c.cid
+					FROM coursetime _ct
+					,(
+						SELECT cid 
+						FROM course
+						WHERE teacherId IN(SELECT uid FROM USER WHERE jwnewaccount = #{jwAccount} AND delFlag = 0)
+						AND cyear = #{scClockModel.cyear} AND csemester = #{scClockModel.csemester}
+						AND delFlag = 0
+					)_c
+					WHERE _ct.IDCourse = _c.cid AND _ct.delFlag = 0
+					AND WEEKDAY = #{scClockModel.weekday} AND startSection = #{scClockModel.section}
+					AND SUBSTR(weeksBinary, #{scClockModel.week} + 1,1) = "1"
+				)
+				AND _year = #{scClockModel.cyear} AND semester  = #{scClockModel.csemester}
+				AND isValid = 1
+				) 
+			AND delFlag = 0)_tmp
+			WHERE _sa.jwAccount =_tmp.jwnewaccount 
+		) _stulist 
+		LEFT JOIN studentinfodetail _stuinfo ON _stulist.jwAccount = _stuinfo.`stuNo`
+	</select>
+
+	<insert id="insertClockInRecord">
+		insert into tattendancerecord 
+			(idteacher,cyear,csemester,week,IDCourseTime,lng,lat)
+		select  uid 
+				,#{schoolClock.cyear}
+				,#{schoolClock.csemester}
+				,#{schoolClock.week}
+				,#{IDCourseTime}
+				,#{lng}
+				,#{lat}
+		from user 
+		where delFlag = 0 
+		and jwnewaccount = #{jwAccount}  
+		limit 1
+	</insert>
+	
+	
+	<select id="getCourseTimeByTeacherNoNow" resultType="java.lang.Integer">
+		select ctid as result
+			from coursetime
+			where IDCourse in
+				(
+					select cid from course
+					where teacherId in(
+					select uid from user where jwnewaccount = #{jwAccount} and delFlag = 0
+				)
+				and delFlag = 0
+				and cyear = #{schoolClock.cyear}
+				and csemester = #{schoolClock.csemester}
+				)
+			and SUBSTR(weeksBinary,#{schoolClock.week} + 1,1) = "1"
+			and startSection = #{schoolClock.section}
+			and weekday = #{schoolClock.weekday}
+			and delFlag = 0	
+			
+			and ctid not in(
+				select IDCourseTime from tattendancerecord
+				where IDteacher = (select uid from user where jwnewaccount = #{jwAccount} and delFlag = 0)
+					and cyear = #{schoolClock.cyear}
+					and csemester = #{schoolClock.csemester}
+					and `week` = #{schoolClock.week}
+					and isValid = 1
+					and delFlag = 0
+			)
+	</select>
+	
+	
+	<insert id="insertStudentClockInRecord">
+		insert into attendance
+			(IDuser,IDCourseTime,week,attendanceStatus)
+		values
+		<foreach collection="stuList" item="stu" separator=",">
+			(#{stu.id}, #{idCourseTime},#{week},#{stu.clockinType})
+		</foreach>
+		
+	</insert>
+	
+</mapper>
